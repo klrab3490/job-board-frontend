@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Job Board — Frontend (HTML + Tailwind)</title>
+        <script
+            src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body class="bg-slate-50 text-slate-900 min-h-screen">
+        <header class="bg-white shadow-sm">
+            <div
+                class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a class="font-semibold text-xl" href="#">GenJob</a>
+                    <span class="text-sm text-slate-500">Frontend for
+                        job-board-backend</span>
+                </div>
+                <nav class="flex items-center gap-3" id="nav-auth">
+                    <!-- Populated dynamically -->
+                </nav>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 py-8">
+            <!-- Search & Filters -->
+            <section class="mb-6">
+                <div class="flex gap-3">
+                    <input id="search"
+                        class="flex-1 px-4 py-2 rounded-md border"
+                        placeholder="Search jobs, e.g. Frontend, Remote, Python" />
+                    <select id="location" class="px-4 py-2 rounded-md border">
+                        <option value>All locations</option>
+                        <option>Remote</option>
+                        <option>India</option>
+                        <option>USA</option>
+                    </select>
+                    <button id="btn-search"
+                        class="px-4 py-2 rounded-md bg-slate-800 text-white">Search</button>
+                </div>
+            </section>
+
+            <!-- Jobs grid -->
+            <section id="jobs-list"
+                class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Job cards are inserted here by JS -->
+            </section>
+        </main>
+
+        <!-- Job detail modal -->
+        <div id="job-modal"
+            class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50">
+            <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-lg">
+                <button id="close-modal"
+                    class="ml-auto mb-3 text-slate-500">Close</button>
+                <div id="job-detail"></div>
+            </div>
+        </div>
+
+        <!-- Post Job slide-over -->
+        <div id="post-panel"
+            class="fixed right-0 top-0 h-full w-full md:w-[480px] transform translate-x-full bg-white shadow-lg z-50 transition-transform">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold">Post a Job</h3>
+                    <button id="close-post"
+                        class="text-slate-500">Close</button>
+                </div>
+                <form id="post-form" class="mt-4 space-y-3">
+                    <input name="title" required placeholder="Job title"
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <input name="company" required placeholder="Company name"
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <input name="location" placeholder="Location (or Remote)"
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <select name="type"
+                        class="w-full px-3 py-2 border rounded-md">
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                    </select>
+                    <textarea name="description" required
+                        placeholder="Job description"
+                        class="w-full px-3 py-2 border rounded-md h-32"></textarea>
+                    <div class="flex gap-2">
+                        <button type="submit"
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-md">Publish</button>
+                        <button type="button" id="save-draft"
+                            class="px-4 py-2 rounded-md border">Save
+                            draft</button>
+                    </div>
+                    <p id="post-msg" class="text-sm text-green-600"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Simple login modal -->
+        <div id="login-modal"
+            class="fixed inset-0 hidden flex items-center justify-center bg-black/40 z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                <h3 class="text-lg font-semibold mb-3">Login</h3>
+                <form id="login-form" class="space-y-3">
+                    <input name="email" type="email" placeholder="Email"
+                        required class="w-full px-3 py-2 border rounded-md" />
+                    <input name="password" type="password"
+                        placeholder="Password" required
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <div class="flex justify-end items-center gap-2">
+                        <button type="submit"
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-md">Sign
+                            in</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Register modal (new) -->
+        <div id="register-modal"
+            class="fixed inset-0 hidden flex items-center justify-center bg-black/40 z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                <h3 class="text-lg font-semibold mb-3">Create account</h3>
+                <form id="register-form" class="space-y-3">
+                    <input name="email" type="email" placeholder="Email"
+                        required class="w-full px-3 py-2 border rounded-md" />
+                    <input name="password" type="password"
+                        placeholder="Password" required
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <input name="username" type="text" placeholder="Username"
+                        class="w-full px-3 py-2 border rounded-md" />
+                    <!-- Optionally allow admin flag only if you want local testing (disabled for production) -->
+                    <div class="text-sm text-slate-500">Accounts are normal
+                        users by default.</div>
+                    <div class="flex justify-between items-center">
+                        <div></div>
+                        <div class="flex gap-2">
+                            <button type="button" id="close-register"
+                                class="px-4 py-2 rounded-md border">Cancel</button>
+                            <button type="submit"
+                                class="bg-indigo-600 text-white px-4 py-2 rounded-md">Create</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            const API_BASE = "https://job-board-backend-lsd8.onrender.com"; // backend URL
+            const storage = sessionStorage;
+
+            function el(html) {
+                const t = document.createElement("template");
+                t.innerHTML = html.trim();
+                return t.content.firstChild;
+            }
+
+            function escapeHtml(s) {
+                if (!s && s !== 0) return "";
+                return String(s)
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#39;");
+            }
+
+            // === AUTH HELPERS ===
+            function getAccessToken() {
+                return storage.getItem("accessToken");
+            }
+            function getRefreshToken() {
+                return storage.getItem("refreshToken");
+            }
+            function getUser() {
+                const u = storage.getItem("user");
+                return u ? JSON.parse(u) : null;
+            }
+
+            async function refreshAccessToken() {
+                const refreshToken = getRefreshToken();
+                if (!refreshToken) return null;
+                const res = await fetch(`${API_BASE}/api/auth/token`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refreshToken }),
+                });
+                if (!res.ok) {
+                    console.warn("Refresh failed");
+                    storage.clear();
+                    renderHeader();
+                    return null;
+                }
+                const data = await res.json();
+                storage.setItem("accessToken", data.accessToken);
+                return data.accessToken;
+            }
+
+            async function authFetch(url, options = {}) {
+                let token = getAccessToken();
+                options.headers = options.headers || {};
+                if (token) options.headers["Authorization"] = `Bearer ${token}`;
+                let res = await fetch(url, options);
+                if (res.status === 401) {
+                    token = await refreshAccessToken();
+                    if (token) {
+                        options.headers["Authorization"] = `Bearer ${token}`;
+                        res = await fetch(url, options);
+                    }
+                }
+                return res;
+            }
+
+            // === HEADER STATE ===
+            function renderHeader() {
+                const nav = document.getElementById("nav-auth");
+                const user = getUser();
+                nav.innerHTML = "";
+                if (user) {
+                    nav.appendChild(el(`<span class="text-sm text-slate-600">Hello, <strong>${escapeHtml(user.email)}</strong></span>`));
+                    const btnLogout = el(`<button id="btn-logout" class="px-3 py-2 rounded-md hover:bg-slate-100">Logout</button>`);
+                    // Only show Post Job to admin users
+                    let btnPost = null;
+                    if (user.role && user.role === "admin") {
+                        btnPost = el(`<button id="btn-post" class="bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700">Post Job</button>`);
+                        nav.appendChild(btnPost);
+                        btnPost.addEventListener("click", openPostPanel);
+                    }
+                    nav.appendChild(btnLogout);
+
+                    btnLogout.addEventListener("click", async () => {
+                        const refreshToken = getRefreshToken();
+                        if (refreshToken) {
+                            await fetch(`${API_BASE}/api/auth/logout`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ refreshToken }),
+                            });
+                        }
+                        storage.clear();
+                        renderHeader();
+                        alert("Logged out!");
+                    });
+                } else {
+                    const btnLogin = el(`<button id="btn-login" class="px-3 py-2 rounded-md hover:bg-slate-100">Login</button>`);
+                    const btnRegister = el(`<button id="btn-register" class="px-3 py-2 rounded-md hover:bg-slate-100">Register</button>`);
+                    nav.append(btnLogin, btnRegister);
+                    btnLogin.addEventListener("click", () => document.getElementById("login-modal").classList.remove("hidden"));
+                    btnRegister.addEventListener("click", () => document.getElementById("register-modal").classList.remove("hidden"));
+                }
+            }
+
+            // === JOBS ===
+            async function fetchJobs() {
+                try {
+                    const res = await fetch(`${API_BASE}/api/jobs`);
+                    if (!res.ok) {
+                        console.error('fetchJobs failed', res.status);
+                        return { items: [] };
+                    }
+                    const data = await res.json();
+                    console.log("Fetched jobs:", data);
+                    // Backend might return either an array or { items: [...] }
+                    if (Array.isArray(data)) return { items: data };
+                    if (data && Array.isArray(data.jobs)) return data;
+                    // fallback
+                    return { items: [] };
+                } catch (err) {
+                    console.error('fetchJobs error', err);
+                    return { items: [] };
+                }
+             }
+ 
+            function jobCard(job) {
+                return el(`
+                    <article class="bg-white p-4 rounded-xl shadow-sm border">
+                        <div class="flex justify-between items-start gap-3">
+                            <div>
+                                <h3 class="font-semibold text-lg">${escapeHtml(job.title)}</h3>
+                                <p class="text-sm text-slate-500">${escapeHtml(job.company)} • ${escapeHtml(job.location || "Remote")}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium">${escapeHtml(job.type || "Full-time")}</p>
+                                <button data-id="${job._id}" class="mt-2 px-3 py-1 rounded-md border view-job">View</button>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-sm text-slate-600 line-clamp-3">${escapeHtml(job.description || "").slice(0,200)}</p>
+                    </article>
+                `);
+            }
+
+            async function showJobs() {
+                const q = document.getElementById("search").value.trim();
+                const out = document.getElementById("jobs-list");
+                out.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500">Loading...</div>';
+                const data = await fetchJobs();
+                out.innerHTML = "";
+                const items = data.jobs || [];
+                if (items.length === 0) {
+                    out.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500">No jobs found.</div>';
+                    return;
+                }
+                items.forEach((job) => out.appendChild(jobCard(job)));
+
+                document.querySelectorAll(".view-job").forEach((btn) =>
+                    btn.addEventListener("click", async (ev) => {
+                        const id = ev.currentTarget.dataset.id;
+                        const res = await fetch(`${API_BASE}/api/jobs/${id}`);
+                        if (!res.ok) return alert("Could not load job");
+                        const job = await res.json();
+                        openJobModal(job);
+                    })
+                );
+            }
+
+            function openJobModal(job) {
+                const modal = document.getElementById("job-modal");
+                const detail = document.getElementById("job-detail");
+                detail.innerHTML = `
+                    <h2 class="text-2xl font-bold">${escapeHtml(job.title)}</h2>
+                    <p class="text-sm text-slate-500">${escapeHtml(job.company)} • ${escapeHtml(job.location || "Remote")}</p>
+                    <div class="mt-4 prose">
+                        <p>${escapeHtml(job.description).replaceAll("\n", "<br/>")}</p>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <a href="mailto:recruit@${escapeHtml(job.company || "company")}.com" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Apply</a>
+                    </div>
+                `;
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
+
+            function openPostPanel() {
+                const panel = document.getElementById("post-panel");
+                panel.classList.remove("translate-x-full");
+                panel.classList.add("translate-x-0");
+             }
+             
+             function closePostPanel() {
+                const panel = document.getElementById("post-panel");
+                panel.classList.remove("translate-x-0");
+                panel.classList.add("translate-x-full");
+             }
+ 
+             document.addEventListener("DOMContentLoaded", () => {
+                 renderHeader();
+                 showJobs();
+ 
+                 document.getElementById("btn-search").addEventListener("click", () => showJobs());
+                 document.getElementById("close-post").addEventListener("click", closePostPanel);
+                 document.getElementById("close-modal").addEventListener("click", () =>
+                     document.getElementById("job-modal").classList.add("hidden")
+                 );
+ 
+                 // === LOGIN ===
+                 document.getElementById("login-form").addEventListener("submit", async (ev) => {
+                     ev.preventDefault();
+                     const payload = Object.fromEntries(new FormData(ev.target).entries());
+                     try {
+                         const res = await fetch(`${API_BASE}/api/auth/login`, {
+                             method: "POST",
+                             headers: { "Content-Type": "application/json" },
+                             body: JSON.stringify(payload),
+                         });
+                         if (!res.ok) throw new Error("Auth failed");
+                         const data = await res.json();
+                         storage.setItem("accessToken", data.accessToken);
+                         storage.setItem("refreshToken", data.refreshToken);
+                         storage.setItem("user", JSON.stringify(data.user));
+                         document.getElementById("login-modal").classList.add("hidden");
+                         alert("Logged in successfully!");
+                         renderHeader();
+                     } catch (err) {
+                         alert("Login failed");
+                     }
+                 });
+
+                // === POST JOB ===
+                document.getElementById("post-form").addEventListener("submit", async (ev) => {
+                    ev.preventDefault();
+                    const form = new FormData(ev.target);
+                    const payload = Object.fromEntries(form.entries());
+                    console.log("Posting job:", payload);
+                    try {
+                        const res = await authFetch(`${API_BASE}/api/jobs`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+                        if (!res.ok) throw new Error("Failed to post job");
+                        document.getElementById("post-msg").textContent = "Job posted successfully!";
+                        closePostPanel();
+                        showJobs();
+                    } catch (e) {
+                        document.getElementById("post-msg").textContent = "Unable to post job.";
+                    }
+                });
+
+                // === REGISTER ===
+                document.getElementById("register-form").addEventListener("submit", async (ev) => {
+                    ev.preventDefault();
+                    const payload = Object.fromEntries(new FormData(ev.target).entries());
+                    try {
+                        const res = await fetch(`${API_BASE}/api/auth/register`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+                        if (!res.ok) throw new Error("Registration failed");
+                        document.getElementById("register-modal").classList.add("hidden");
+                        alert("Registration successful! You can now log in.");
+                    } catch (err) {
+                        alert("Registration error: " + err.message);
+                    }
+                });
+             });
+        </script>
+    </body>
+</html>
